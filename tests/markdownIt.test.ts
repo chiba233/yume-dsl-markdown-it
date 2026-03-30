@@ -243,6 +243,13 @@ const cases: TestCase[] = [
     },
   },
   {
+    name: "inline DSL inside link label does not crash (silent pos advance)",
+    run: () => {
+      const result = md.render("[$$bold(x)$$](https://example.com)").trim();
+      assert.equal(result, '<p><a href="https://example.com"><strong>x</strong></a></p>');
+    },
+  },
+  {
     name: "block form does not cross blockquote boundary",
     run: () => {
       const result = md.render("> $$collapse(note)*\n> hello\n\n*end$$").trim();

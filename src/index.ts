@@ -210,13 +210,14 @@ export function yumePlugin<TEnv = undefined>(
 
     const { match } = attempt;
     if (!match || match.form !== "inline") return false;
+
+    state.pos = start + match.endOffset;
     if (silent) return true;
 
     const token = state.push("yume_inline", "", 0);
     token.content = match.source;
     attempt.html ??= renderMatch(md, parser, ruleset, env, match, onRenderFailure);
     token.meta = createMeta(attempt.html);
-    state.pos = start + match.endOffset;
     return true;
   });
 

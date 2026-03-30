@@ -2,7 +2,7 @@
 
 # 更新日志
 
-### 0.1.0
+### 0.1.1
 
 - 首次发布 — yume-dsl-rich-text 的 markdown-it 插件
 - Inline rule：将 tag 语法交给 `parser.structural()` 判断，渲染交给 `interpretTokens`

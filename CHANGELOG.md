@@ -2,7 +2,7 @@
 
 # Changelog
 
-### 0.1.0
+### 0.1.1
 
 - Initial release — markdown-it plugin for yume-dsl-rich-text
 - Inline rule: delegates tag grammar to `parser.structural()`, renders via `interpretTokens`
