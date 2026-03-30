@@ -1,0 +1,71 @@
+{
+  "name": "yume-dsl-markdown-it",
+  "version": "0.1.0",
+  "description": "markdown-it plugin that renders yume-dsl rich-text tags via token-walker",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "types": {
+        "import": "./dist/index.d.ts",
+        "require": "./dist/index.d.cts"
+      },
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup --target esnext",
+    "test": "tsup --target esnext && node --import tsx tests/run-markdown-it-tests.ts",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": [
+    "yume-dsl",
+    "markdown-it",
+    "markdown-it-plugin",
+    "rich-text",
+    "dsl",
+    "token-walker"
+  ],
+  "author": "Hoshino Yumeka",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chiba233/yume-dsl-markdown-it.git"
+  },
+  "homepage": "https://github.com/chiba233/yume-dsl-markdown-it#readme",
+  "bugs": {
+    "url": "https://github.com/chiba233/yume-dsl-markdown-it/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "yume-dsl-rich-text": "^1.0.7",
+    "yume-dsl-token-walker": "^1.0.2"
+  },
+  "peerDependencies": {
+    "markdown-it": ">=14.0.0"
+  },
+  "devDependencies": {
+    "@types/markdown-it": "^14.1.2",
+    "@types/node": "^25.5.0",
+    "markdown-it": "^14.1.0",
+    "tsup": "^8.5.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.7.0",
+    "yume-dsl-rich-text": "^1.0.9"
+  }
+}
