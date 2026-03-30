@@ -29,6 +29,8 @@ No syntax rules are hard-coded; swap `createEasySyntax({ tagPrefix: "%%" })` ups
 - Failed DSL fragments fall back to escaped source text by default (`onRenderFailure: "preserve"`)
 - Optional `shouldAttempt` fast-path gate to skip parsing at non-DSL positions
 - Silent / non-silent result caching — each position is parsed at most once per parser state
+- Block matching is bounded to the current markdown-it container, so blockquotes / lists do not leak prefixes or
+  closing markers across boundaries
 
 **This package is in early development (v0.x).** The API may change between minor versions.
 Once stable, breaking changes will land in major versions with explicit migration notes.
@@ -60,12 +62,12 @@ text ──▶ yume-dsl-rich-text (parse) ──▶ TextToken[] ──▶ yume-d
                         markdown-it pipeline ──▶ HTML
 ```
 
-| Package                                                                            | Role                                                            |
-|------------------------------------------------------------------------------------|-----------------------------------------------------------------|
-| [`yume-dsl-rich-text`](https://github.com/chiba233/yumeDSL)                        | Parser — text to token tree                                     |
-| [`yume-dsl-token-walker`](https://github.com/chiba233/yume-dsl-token-walker)       | Interpreter — token tree to output nodes                        |
-| [`yume-dsl-shiki-highlight`](https://github.com/chiba233/yume-dsl-shiki-highlight) | Syntax highlighting — tokens or TextMate grammar                |
-| **`yume-dsl-markdown-it`**                                                         | markdown-it plugin — DSL tags inside Markdown (this package)    |
+| Package                                                                            | Role                                                         |
+|------------------------------------------------------------------------------------|--------------------------------------------------------------|
+| [`yume-dsl-rich-text`](https://github.com/chiba233/yumeDSL)                        | Parser — text to token tree                                  |
+| [`yume-dsl-token-walker`](https://github.com/chiba233/yume-dsl-token-walker)       | Interpreter — token tree to output nodes                     |
+| [`yume-dsl-shiki-highlight`](https://github.com/chiba233/yume-dsl-shiki-highlight) | Syntax highlighting — tokens or TextMate grammar             |
+| **`yume-dsl-markdown-it`**                                                         | markdown-it plugin — DSL tags inside Markdown (this package) |
 
 ---
 
@@ -86,27 +88,27 @@ pnpm add yume-dsl-markdown-it markdown-it
 
 ```ts
 import MarkdownIt from "markdown-it";
-import { createParser, createSimpleInlineHandlers } from "yume-dsl-rich-text";
-import type { InterpretRuleset } from "yume-dsl-token-walker";
-import { yumePlugin } from "yume-dsl-markdown-it";
+import {createParser, createSimpleInlineHandlers} from "yume-dsl-rich-text";
+import type {InterpretRuleset} from "yume-dsl-token-walker";
+import {yumePlugin} from "yume-dsl-markdown-it";
 
 const parser = createParser({
-  handlers: createSimpleInlineHandlers(["bold", "italic"]),
+    handlers: createSimpleInlineHandlers(["bold", "italic"]),
 });
 
 const ruleset: InterpretRuleset<string> = {
-  createText: (text) => text,
-  interpret: (token, helpers) => {
-    if (token.type === "bold")
-      return { type: "nodes", nodes: ["<strong>", ...helpers.interpretChildren(token.value), "</strong>"] };
-    if (token.type === "italic")
-      return { type: "nodes", nodes: ["<em>", ...helpers.interpretChildren(token.value), "</em>"] };
-    return { type: "unhandled" };
-  },
-  onUnhandled: "flatten",
+    createText: (text) => text,
+    interpret: (token, helpers) => {
+        if (token.type === "bold")
+            return {type: "nodes", nodes: ["<strong>", ...helpers.interpretChildren(token.value), "</strong>"]};
+        if (token.type === "italic")
+            return {type: "nodes", nodes: ["<em>", ...helpers.interpretChildren(token.value), "</em>"]};
+        return {type: "unhandled"};
+    },
+    onUnhandled: "flatten",
 };
 
-const md = new MarkdownIt().use(yumePlugin, { parser, ruleset, env: undefined });
+const md = new MarkdownIt().use(yumePlugin, {parser, ruleset, env: undefined});
 
 md.render("# Hello $$bold(world)$$");
 // → <h1>Hello <strong>world</strong></h1>
@@ -118,20 +120,20 @@ md.render("# Hello $$bold(world)$$");
 
 ```ts
 interface YumePluginOptions<TEnv = undefined> {
-  /** yume-dsl-rich-text parser instance */
-  parser: Parser;
+    /** yume-dsl-rich-text parser instance */
+    parser: Parser;
 
-  /** token-walker ruleset whose string nodes represent HTML fragments */
-  ruleset: InterpretRuleset<string, TEnv>;
+    /** token-walker ruleset whose string nodes represent HTML fragments */
+    ruleset: InterpretRuleset<string, TEnv>;
 
-  /** environment value forwarded to every interpret call */
-  env: TEnv;
+    /** environment value forwarded to every interpret call */
+    env: TEnv;
 
-  /** optional fast-path gate before delegating to the parser */
-  shouldAttempt?: (src: string, pos: number) => boolean;
+    /** optional fast-path gate before delegating to the parser */
+    shouldAttempt?: (src: string, pos: number) => boolean;
 
-  /** render contract for parse / interpret failures after a DSL match is confirmed */
-  onRenderFailure?: "preserve" | "throw" | ((context: RenderFailureContext<TEnv>) => string);
+    /** render contract for parse / interpret failures after a DSL match is confirmed */
+    onRenderFailure?: "preserve" | "throw" | ((context: RenderFailureContext<TEnv>) => string);
 }
 ```
 
@@ -142,10 +144,10 @@ that position. Useful when you know your DSL always starts with a fixed prefix:
 
 ```ts
 md.use(yumePlugin, {
-  parser,
-  ruleset,
-  env: undefined,
-  shouldAttempt: (src, pos) => src.charCodeAt(pos) === 0x24 && src.charCodeAt(pos + 1) === 0x24,
+    parser,
+    ruleset,
+    env: undefined,
+    shouldAttempt: (src, pos) => src.charCodeAt(pos) === 0x24 && src.charCodeAt(pos + 1) === 0x24,
 });
 ```
 
@@ -153,10 +155,10 @@ md.use(yumePlugin, {
 
 Controls what happens when a DSL tag is structurally matched but `interpretTokens` throws:
 
-| Value        | Behavior                                        |
-|--------------|-------------------------------------------------|
-| `"preserve"` | Emit the original source text, HTML-escaped     |
-| `"throw"`    | Re-throw the error                              |
+| Value        | Behavior                                                     |
+|--------------|--------------------------------------------------------------|
+| `"preserve"` | Emit the original source text, HTML-escaped                  |
+| `"throw"`    | Re-throw the error                                           |
 | `function`   | Call with `{ error, source, env, form }`, return HTML string |
 
 Default: `"preserve"`.
@@ -167,14 +169,15 @@ Default: `"preserve"`.
 
 The plugin recognizes all three yume-dsl tag forms:
 
-| Form   | Syntax                          | Rule    | Example                                  |
-|--------|---------------------------------|---------|------------------------------------------|
-| Inline | `$$tag(content)$$`              | Inline  | `$$bold(hello)$$`                        |
-| Raw    | `$$tag(arg)% content %end$$`    | Block   | `$$code(ts)% const x = 1; %end$$`       |
-| Block  | `$$tag(arg)* content *end$$`    | Block   | `$$collapse(note)* ... *end$$`           |
+| Form   | Syntax                       | Rule   | Example                           |
+|--------|------------------------------|--------|-----------------------------------|
+| Inline | `$$tag(content)$$`           | Inline | `$$bold(hello)$$`                 |
+| Raw    | `$$tag(arg)% content %end$$` | Block  | `$$code(ts)% const x = 1; %end$$` |
+| Block  | `$$tag(arg)* content *end$$` | Block  | `$$collapse(note)* ... *end$$`    |
 
 Inline tags live inside paragraphs, headings, list items, etc.
 Raw and block tags are block-level — they stand alone between paragraphs.
+When used inside blockquotes or list items, block/raw matching stays inside that container.
 
 ---
 
@@ -184,14 +187,14 @@ The plugin does not hard-code any delimiter. If you create a parser with custom 
 follows automatically:
 
 ```ts
-import { createEasySyntax, createParser, createSimpleInlineHandlers } from "yume-dsl-rich-text";
+import {createEasySyntax, createParser, createSimpleInlineHandlers} from "yume-dsl-rich-text";
 
 const parser = createParser({
-  syntax: createEasySyntax({ tagPrefix: "%%" }),
-  handlers: createSimpleInlineHandlers(["bold"]),
+    syntax: createEasySyntax({tagPrefix: "%%"}),
+    handlers: createSimpleInlineHandlers(["bold"]),
 });
 
-const md = new MarkdownIt().use(yumePlugin, { parser, ruleset, env: undefined });
+const md = new MarkdownIt().use(yumePlugin, {parser, ruleset, env: undefined});
 
 md.render("%%bold(hello)%%");
 // → <p><strong>hello</strong></p>
@@ -207,6 +210,7 @@ For full syntax customization details, see the
 - **Structural match but render failure**: controlled by `onRenderFailure` (default: `"preserve"`)
 - **No structural match**: the text passes through to markdown-it as-is — no error
 - **Parser exception during structural scan**: silently skipped (returns `false` to markdown-it)
+- **Inline matches inside link labels / other silent scans**: consume input correctly and do not break markdown-it
 
 The plugin never throws by default. Set `onRenderFailure: "throw"` to surface errors during development.
 

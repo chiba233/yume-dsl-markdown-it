@@ -28,6 +28,7 @@
 - DSL 片段渲染失败时默认回退为转义后的源文本（`onRenderFailure: "preserve"`）
 - 可选的 `shouldAttempt` 快速门控，跳过非 DSL 位置的解析
 - silent / non-silent 结果缓存——同一 parser state 内每个位置最多解析一次
+- Block 匹配受当前 markdown-it 容器边界约束，blockquote / list 不会把前缀或结束标记泄漏到容器外
 
 **本包处于早期开发阶段（v0.x）。** API 可能在次版本号之间变动。稳定后，破坏性变更将在主版本号升级时附带明确的迁移说明。
 
@@ -173,6 +174,7 @@ md.use(yumePlugin, {
 
 Inline 标签可出现在段落、标题、列表项等内联上下文中。
 Raw 和 Block 标签是块级的——独立于段落之间。
+当它们出现在 blockquote 或列表项内时，匹配范围也只限于当前容器内部。
 
 ---
 
@@ -203,6 +205,7 @@ md.render("%%bold(hello)%%");
 - **结构匹配成功但渲染失败**：由 `onRenderFailure` 控制（默认 `"preserve"`）
 - **未匹配到结构**：文本原样交给 markdown-it 处理，不产生错误
 - **结构扫描阶段 parser 异常**：静默跳过（向 markdown-it 返回 `false`）
+- **链接文本等 silent scan 场景中的 inline 命中**：会正确消费输入，不会破坏 markdown-it 解析
 
 插件默认不会抛错。在开发阶段可设置 `onRenderFailure: "throw"` 暴露问题。
 
