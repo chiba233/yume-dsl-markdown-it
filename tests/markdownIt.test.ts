@@ -223,6 +223,36 @@ const cases: TestCase[] = [
     },
   },
   {
+    name: "block form inside blockquote excludes container prefix",
+    run: () => {
+      const result = md.render("> $$collapse(note)*\n> hello $$bold(world)$$\n> *end$$\n\nafter").trim();
+      assert.equal(
+        result,
+        "<blockquote>\n<section>hello <strong>world</strong>\n</section>\n</blockquote>\n<p>after</p>",
+      );
+    },
+  },
+  {
+    name: "raw form inside blockquote excludes container prefix",
+    run: () => {
+      const result = md.render("> $$code(js)%\n> const x = 1;\n> %end$$\n\nafter").trim();
+      assert.equal(
+        result,
+        "<blockquote>\n<pre>const x = 1;\n</pre>\n</blockquote>\n<p>after</p>",
+      );
+    },
+  },
+  {
+    name: "block form does not cross blockquote boundary",
+    run: () => {
+      const result = md.render("> $$collapse(note)*\n> hello\n\n*end$$").trim();
+      assert.equal(
+        result,
+        "<blockquote>\n<p>$$collapse(note)*\nhello</p>\n</blockquote>\n<p>*end$$</p>",
+      );
+    },
+  },
+  {
     name: "matched fragments are interpreted once and reuse cached render output",
     run: () => {
       let parseCalls = 0;

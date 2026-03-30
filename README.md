@@ -14,6 +14,11 @@
 [markdown-it](https://github.com/markdown-it/markdown-it) plugin that renders
 [`yume-dsl-rich-text`](https://github.com/chiba233/yumeDSL) tags inside Markdown.
 
+> **Heads-up:** The default tag prefix `$$` conflicts with LaTeX math delimiters (`$$...$$`) used by
+> most markdown-it math plugins. If your Markdown includes math, create the parser with a different
+> prefix — e.g. `createEasySyntax({ tagPrefix: "%%" })` — to avoid collisions. See
+> [Custom Syntax](#custom-syntax).
+
 The plugin is pure pipeline glue — it delegates tag grammar to the rich-text parser and rendering to
 [`yume-dsl-token-walker`](https://github.com/chiba233/yume-dsl-token-walker).
 No syntax rules are hard-coded; swap `createEasySyntax({ tagPrefix: "%%" })` upstream and the plugin follows.
@@ -23,10 +28,10 @@ No syntax rules are hard-coded; swap `createEasySyntax({ tagPrefix: "%%" })` ups
 - `createText` output is automatically HTML-escaped via `md.utils.escapeHtml`
 - Failed DSL fragments fall back to escaped source text by default (`onRenderFailure: "preserve"`)
 - Optional `shouldAttempt` fast-path gate to skip parsing at non-DSL positions
-- Silent / non-silent result caching — each position is parsed at most once per render
+- Silent / non-silent result caching — each position is parsed at most once per parser state
 
-**Core API is stable.** Future updates will prioritize backward compatibility; breaking changes, if any, will land in
-major versions with explicit migration notes.
+**This package is in early development (v0.x).** The API may change between minor versions.
+Once stable, breaking changes will land in major versions with explicit migration notes.
 
 ---
 
@@ -49,8 +54,10 @@ major versions with explicit migration notes.
 
 ```
 text ──▶ yume-dsl-rich-text (parse) ──▶ TextToken[] ──▶ yume-dsl-token-walker (interpret) ──▶ TNode[]
-                │
-                └── yume-dsl-markdown-it ──▶ markdown-it pipeline ──▶ HTML
+         │                                                        │
+         ╰─────────── yume-dsl-markdown-it (glue) ───────────────╯
+                                   ↓
+                        markdown-it pipeline ──▶ HTML
 ```
 
 | Package                                                                            | Role                                                            |
@@ -189,6 +196,9 @@ const md = new MarkdownIt().use(yumePlugin, { parser, ruleset, env: undefined })
 md.render("%%bold(hello)%%");
 // → <p><strong>hello</strong></p>
 ```
+
+For full syntax customization details, see the
+[`yume-dsl-rich-text` documentation](https://github.com/chiba233/yumeDSL/?tab=readme-ov-file#custom-syntax).
 
 ---
 

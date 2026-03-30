@@ -149,7 +149,7 @@ export function yumePlugin<TEnv = undefined>(
 ): void {
   const { parser, ruleset, env, shouldAttempt, onRenderFailure = "preserve" } = options;
 
-  md.block.ruler.before("paragraph", "yume_block", (state, startLine, _endLine, silent) => {
+  md.block.ruler.before("paragraph", "yume_block", (state, startLine, endLine, silent) => {
     if (state.sCount[startLine] - state.blkIndent >= 4) return false;
 
     const start = state.bMarks[startLine] + state.tShift[startLine];
@@ -159,9 +159,17 @@ export function yumePlugin<TEnv = undefined>(
 
     let attempt = getCachedAttempt(state, start);
     if (!attempt) {
+      // Build normalized content bounded by the current container so that
+      // container prefixes (e.g. ">") are excluded and endLine is respected.
+      let content = src.slice(start, state.eMarks[startLine]);
+      for (let line = startLine + 1; line < endLine; line++) {
+        content += "\n" + src.slice(state.bMarks[line], state.eMarks[line]);
+      }
+      content += "\n";
+
       try {
         attempt = setCachedAttempt(state, start, {
-          match: findLeadingMatch(parser, src.slice(start)),
+          match: findLeadingMatch(parser, content),
         });
       } catch {
         return false;
