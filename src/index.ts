@@ -98,6 +98,15 @@ const findLeadingMatch = (parser: Parser, input: string): MatchResult | null => 
   };
 };
 
+const getBlockWindow = (
+  state: {
+    blkIndent: number;
+    getLines: (begin: number, end: number, indent: number, keepLastLF: boolean) => string;
+  },
+  startLine: number,
+  endLine: number,
+): string => state.getLines(startLine, endLine, state.blkIndent, false);
+
 const buildFailureHtml = <TEnv>(
   md: MarkdownIt,
   source: string,
@@ -159,17 +168,10 @@ export function yumePlugin<TEnv = undefined>(
 
     let attempt = getCachedAttempt(state, start);
     if (!attempt) {
-      // Build normalized content bounded by the current container so that
-      // container prefixes (e.g. ">") are excluded and endLine is respected.
-      let content = src.slice(start, state.eMarks[startLine]);
-      for (let line = startLine + 1; line < endLine; line++) {
-        content += "\n" + src.slice(state.bMarks[line], state.eMarks[line]);
-      }
-      content += "\n";
-
       try {
+        const blockWindow = getBlockWindow(state, startLine, endLine);
         attempt = setCachedAttempt(state, start, {
-          match: findLeadingMatch(parser, content),
+          match: findLeadingMatch(parser, blockWindow),
         });
       } catch {
         return false;
