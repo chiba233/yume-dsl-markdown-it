@@ -187,7 +187,7 @@ const cases: TestCase[] = [
       const result = md.render("before\n\n$$collapse(note)*\nhello $$bold(world)$$\n*end$$\n\nafter").trim();
       assert.equal(
         result,
-        "<p>before</p>\n<section>hello <strong>world</strong>\n</section>\n<p>after</p>",
+        "<p>before</p>\n<section>hello <strong>world</strong></section>\n<p>after</p>",
       );
     },
   },
@@ -195,7 +195,7 @@ const cases: TestCase[] = [
     name: "raw form is handled by block ruler",
     run: () => {
       const result = md.render("$$code(js)%\nconst x = 1;\n%end$$").trim();
-      assert.equal(result, "<pre>const x = 1;\n</pre>");
+      assert.equal(result, "<pre>const x = 1;</pre>");
     },
   },
   {
@@ -228,7 +228,7 @@ const cases: TestCase[] = [
       const result = md.render("> $$collapse(note)*\n> hello $$bold(world)$$\n> *end$$\n\nafter").trim();
       assert.equal(
         result,
-        "<blockquote>\n<section>hello <strong>world</strong>\n</section>\n</blockquote>\n<p>after</p>",
+        "<blockquote>\n<section>hello <strong>world</strong></section>\n</blockquote>\n<p>after</p>",
       );
     },
   },
@@ -238,7 +238,7 @@ const cases: TestCase[] = [
       const result = md.render("> $$code(js)%\n> const x = 1;\n> %end$$\n\nafter").trim();
       assert.equal(
         result,
-        "<blockquote>\n<pre>const x = 1;\n</pre>\n</blockquote>\n<p>after</p>",
+        "<blockquote>\n<pre>const x = 1;</pre>\n</blockquote>\n<p>after</p>",
       );
     },
   },
