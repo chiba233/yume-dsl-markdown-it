@@ -53,8 +53,8 @@
     "node": ">=18"
   },
   "dependencies": {
-    "yume-dsl-rich-text": "^1.1.1",
-    "yume-dsl-token-walker": "^1.0.6"
+    "yume-dsl-rich-text": "^1.2.0",
+    "yume-dsl-token-walker": "^1.0.7"
   },
   "peerDependencies": {
     "markdown-it": ">=14.0.0"
@@ -66,6 +66,6 @@
     "tsup": "^8.5.1",
     "tsx": "^4.21.0",
     "typescript": "^5.7.0",
-    "yume-dsl-rich-text": "^1.1.1"
+    "yume-dsl-rich-text": "^1.2.0"
   }
 }
