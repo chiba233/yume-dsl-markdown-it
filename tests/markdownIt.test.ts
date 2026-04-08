@@ -160,7 +160,7 @@ const cases: TestCase[] = [
     name: "custom syntax works without hardcoded $$ trigger",
     run: () => {
       const percentParser = createParser({
-        syntax: createEasySyntax({ tagPrefix: "%%" }),
+        syntax: createEasySyntax({ tagPrefix: "@@" }),
         handlers: createSimpleInlineHandlers(["bold"]),
       });
 
@@ -170,7 +170,7 @@ const cases: TestCase[] = [
         env: undefined,
       });
 
-      const result = percentMd.render("%%bold(hi)%%").trim();
+      const result = percentMd.render("@@bold(hi)@@").trim();
       assert.equal(result, "<p><strong>hi</strong></p>");
     },
   },

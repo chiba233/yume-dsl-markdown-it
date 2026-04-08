@@ -16,11 +16,11 @@
 
 > **注意：** 默认标签前缀 `$$` 与大多数 markdown-it 数学公式插件使用的 LaTeX 定界符（`$$...$$`）
 > 冲突。如果你的 Markdown 包含数学表达式，请在创建 parser 时更换前缀——例如
-> `createEasySyntax({ tagPrefix: "%%" })`。详见[自定义语法](#自定义语法)。
+> `createEasySyntax({ tagPrefix: "@@" })`。详见[自定义语法](#自定义语法)。
 
 插件只做管道胶水——tag 语法交给 rich-text parser，渲染交给
 [`yume-dsl-token-walker`](https://github.com/chiba233/yume-dsl-token-walker)。
-不硬编码任何语法规则；上游换 `createEasySyntax({ tagPrefix: "%%" })` 插件自动跟。
+不硬编码任何语法规则；上游换 `createEasySyntax({ tagPrefix: "@@" })` 插件自动跟。
 
 - **Inline** 标签（`$$tag(...)$$`）由 inline rule 处理
 - **Raw**（`$$tag(arg)%...%end$$`）和 **Block**（`$$tag(arg)*...*end$$`）标签由 block rule 处理
@@ -186,13 +186,13 @@ Raw 和 Block 标签是块级的——独立于段落之间。
 import {createEasySyntax, createParser, createSimpleInlineHandlers} from "yume-dsl-rich-text";
 
 const parser = createParser({
-    syntax: createEasySyntax({tagPrefix: "%%"}),
+    syntax: createEasySyntax({tagPrefix: "@@"}),
     handlers: createSimpleInlineHandlers(["bold"]),
 });
 
 const md = new MarkdownIt().use(yumePlugin, {parser, ruleset, env: undefined});
 
-md.render("%%bold(hello)%%");
+md.render("@@bold(hello)@@");
 // → <p><strong>hello</strong></p>
 ```
 

@@ -16,12 +16,12 @@
 
 > **Heads-up:** The default tag prefix `$$` conflicts with LaTeX math delimiters (`$$...$$`) used by
 > most markdown-it math plugins. If your Markdown includes math, create the parser with a different
-> prefix — e.g. `createEasySyntax({ tagPrefix: "%%" })` — to avoid collisions. See
+> prefix — e.g. `createEasySyntax({ tagPrefix: "@@" })` — to avoid collisions. See
 > [Custom Syntax](#custom-syntax).
 
 The plugin is pure pipeline glue — it delegates tag grammar to the rich-text parser and rendering to
 [`yume-dsl-token-walker`](https://github.com/chiba233/yume-dsl-token-walker).
-No syntax rules are hard-coded; swap `createEasySyntax({ tagPrefix: "%%" })` upstream and the plugin follows.
+No syntax rules are hard-coded; swap `createEasySyntax({ tagPrefix: "@@" })` upstream and the plugin follows.
 
 - **Inline** tags (`$$tag(...)$$`) handled by an inline rule
 - **Raw** (`$$tag(arg)%...%end$$`) and **block** (`$$tag(arg)*...*end$$`) tags handled by a block rule
@@ -190,13 +190,13 @@ follows automatically:
 import {createEasySyntax, createParser, createSimpleInlineHandlers} from "yume-dsl-rich-text";
 
 const parser = createParser({
-    syntax: createEasySyntax({tagPrefix: "%%"}),
+    syntax: createEasySyntax({tagPrefix: "@@"}),
     handlers: createSimpleInlineHandlers(["bold"]),
 });
 
 const md = new MarkdownIt().use(yumePlugin, {parser, ruleset, env: undefined});
 
-md.render("%%bold(hello)%%");
+md.render("@@bold(hello)@@");
 // → <p><strong>hello</strong></p>
 ```
 
