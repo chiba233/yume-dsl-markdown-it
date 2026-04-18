@@ -29,7 +29,7 @@
   "scripts": {
     "build": "tsup --target esnext",
     "test": "tsup --target esnext && node --import tsx tests/run-markdown-it-tests.ts",
-    "lint": "pnpm run lint:eslint && tsc --noEmit -p tsconfig.json",
+    "lint": "npm run lint:eslint && tsc --noEmit -p tsconfig.json",
     "lint:eslint": "eslint \"src/**/*.ts\""
   },
   "keywords": [
